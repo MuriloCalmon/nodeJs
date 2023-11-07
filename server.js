@@ -1,32 +1,50 @@
-// import { createServer } from 'node:http'
-
-// const server = createServer((request, response) => {
-//     response.write('Hello World')
-
-//     response.end()
-// })
-
-// server.listen(3333)
-
 import { fastify } from 'fastify'
+import {DatabaseMemory} from './database-memory.js'
 
 
 const server = fastify()
 
-server.post('/videos', () => {
-    return 'Hello world'
+const databse = new DatabaseMemory()
+//reply é como chama o response no lib fastify
+server.post('/videos', (request, reply) => {
+    const {title, description, duration} = request.body
+
+    databse.create({
+        title,
+        description,
+        duration
+    })
+
+    return reply.status(201).send()
 })
 
 server.get('/videos', () => {
-    return 'Hello music'
+    const video = databse.list()
+
+    return video
 })
 
-server.put('/videos/:id', () => {
-    return 'Hello fast'
+server.put('/videos/:id', (request, reply) => {
+    const videoId = request.params.id
+    
+    const {title, description, duration} = request.body
+
+    databse.update(videoId,{
+        title,
+        description,
+        duration
+    })
+
+    return reply.status(204).send()
 })
 
 server.delete('/videos/:id', () => {
-    return 'Hello fast'
+    const videoId = request.params.id
+
+    databse.delete(videoId)
+
+    return reply.status(204).send()
+
 })
 
 server.listen({
